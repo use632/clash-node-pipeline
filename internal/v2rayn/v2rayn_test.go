@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"clash-node-pipeline/internal/model"
+	"github.com/use632/clash-node-pipeline/internal/model"
 )
 
 func TestSSLinkRoundTrip(t *testing.T) {

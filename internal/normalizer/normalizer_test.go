@@ -3,7 +3,7 @@ package normalizer
 import (
 	"testing"
 
-	"clash-node-pipeline/internal/model"
+	"github.com/use632/clash-node-pipeline/internal/model"
 )
 
 func TestNormalizeDuplicateNames(t *testing.T) {

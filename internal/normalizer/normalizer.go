@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"clash-node-pipeline/internal/model"
+	"github.com/use632/clash-node-pipeline/internal/model"
 )
 
 var badNameChars = regexp.MustCompile(`[\r\n\t]+`)

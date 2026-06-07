@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"clash-node-pipeline/internal/model"
+	"github.com/use632/clash-node-pipeline/internal/model"
 )
 
 // BuildLinks converts nodes to share links, skipping unsupported ones.

@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"clash-node-pipeline/internal/model"
+	"github.com/use632/clash-node-pipeline/internal/model"
 	"gopkg.in/yaml.v3"
 )
 

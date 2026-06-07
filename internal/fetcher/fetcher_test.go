@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"clash-node-pipeline/internal/model"
+	"github.com/use632/clash-node-pipeline/internal/model"
 )
 
 func TestParseProxy(t *testing.T) {

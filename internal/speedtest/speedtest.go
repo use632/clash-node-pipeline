@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"clash-node-pipeline/internal/model"
+	"github.com/use632/clash-node-pipeline/internal/model"
 )
 
 func Stage1(ctx context.Context, nodes []model.Node, concurrency, timeoutMS int) []model.TestResult {

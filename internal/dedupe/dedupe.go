@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"clash-node-pipeline/internal/model"
+	"github.com/use632/clash-node-pipeline/internal/model"
 )
 
 func Dedupe(nodes []model.Node) []model.Node {

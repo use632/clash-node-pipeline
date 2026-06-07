@@ -1,4 +1,4 @@
-module clash-node-pipeline
+module github.com/use632/clash-node-pipeline
 
 go 1.23
 

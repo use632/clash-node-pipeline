@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"clash-node-pipeline/internal/model"
+	"github.com/use632/clash-node-pipeline/internal/model"
 )
 
 // vmessLink builds vmess://<base64-json> in the common v2rayN format.

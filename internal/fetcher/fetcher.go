@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"clash-node-pipeline/internal/dateadjust"
-	"clash-node-pipeline/internal/model"
+	"github.com/use632/clash-node-pipeline/internal/dateadjust"
+	"github.com/use632/clash-node-pipeline/internal/model"
 )
 
 // fetchClient is a named HTTP client (e.g. "代理" or "直连"), tried in order.

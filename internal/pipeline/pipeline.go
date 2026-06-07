@@ -10,16 +10,16 @@ import (
 	"sort"
 	"time"
 
-	"clash-node-pipeline/internal/clash"
-	"clash-node-pipeline/internal/config"
-	"clash-node-pipeline/internal/dedupe"
-	"clash-node-pipeline/internal/fetcher"
-	"clash-node-pipeline/internal/mihomo"
-	"clash-node-pipeline/internal/model"
-	"clash-node-pipeline/internal/normalizer"
-	"clash-node-pipeline/internal/parser"
-	"clash-node-pipeline/internal/speedtest"
-	"clash-node-pipeline/internal/v2rayn"
+	"github.com/use632/clash-node-pipeline/internal/clash"
+	"github.com/use632/clash-node-pipeline/internal/config"
+	"github.com/use632/clash-node-pipeline/internal/dedupe"
+	"github.com/use632/clash-node-pipeline/internal/fetcher"
+	"github.com/use632/clash-node-pipeline/internal/mihomo"
+	"github.com/use632/clash-node-pipeline/internal/model"
+	"github.com/use632/clash-node-pipeline/internal/normalizer"
+	"github.com/use632/clash-node-pipeline/internal/parser"
+	"github.com/use632/clash-node-pipeline/internal/speedtest"
+	"github.com/use632/clash-node-pipeline/internal/v2rayn"
 )
 
 type Options struct {

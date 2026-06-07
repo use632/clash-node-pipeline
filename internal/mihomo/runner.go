@@ -19,7 +19,7 @@ import (
 	"sync"
 	"time"
 
-	"clash-node-pipeline/internal/model"
+	"github.com/use632/clash-node-pipeline/internal/model"
 )
 
 // Config controls a mihomo-backed delay test run.

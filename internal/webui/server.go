@@ -14,10 +14,10 @@ import (
 	"strings"
 	"time"
 
-	"clash-node-pipeline/internal/dateadjust"
-	"clash-node-pipeline/internal/model"
-	"clash-node-pipeline/internal/pipeline"
-	"clash-node-pipeline/internal/savedsources"
+	"github.com/use632/clash-node-pipeline/internal/dateadjust"
+	"github.com/use632/clash-node-pipeline/internal/model"
+	"github.com/use632/clash-node-pipeline/internal/pipeline"
+	"github.com/use632/clash-node-pipeline/internal/savedsources"
 	"gopkg.in/yaml.v3"
 )
 
