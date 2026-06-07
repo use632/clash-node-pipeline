@@ -1,0 +1,22 @@
+# Generated output (subscriptions, reports, logs, and your saved subscription URLs)
+/output/
+
+# Compiled binaries
+*.exe
+*.exe~
+clash-node-pipeline
+
+# Personal/live config files (keep them locally, don't publish)
+configs/live-*.yaml
+
+# Go workspace / test artifacts
+*.test
+*.out
+/vendor/
+
+# Editor / OS noise
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db

@@ -1,0 +1,6 @@
+# Normalize line endings: keep LF in the repository for text files.
+* text=auto eol=lf
+# Windows batch scripts need CRLF to run reliably.
+*.bat text eol=crlf
+# Treat binaries as binary.
+*.exe binary

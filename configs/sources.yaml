@@ -1,0 +1,64 @@
+sources:
+  - name: example-local
+    url: "testdata/mixed-sources.txt"
+    enabled: true
+
+# Dynamic subscription URL examples:
+# 1) Explicit placeholder — {date} is expanded per date_formats below:
+# sources:
+#   - name: daily-sub
+#     url: "https://example.com/sub/{date}"
+#     enabled: true
+# 2) Auto date adjustment — a date already embedded in the URL (e.g. the
+#    2026/06 and 20260607 below) is automatically shifted to today on each run,
+#    so you write the link once and it keeps working:
+# sources:
+#   - name: clashnode
+#     url: "https://node.example.com/uploads/2026/06/0-20260607.txt"
+#     enabled: true
+
+date_formats:
+  - "20060102"
+  - "2006-01-02"
+
+fetch:
+  concurrency: 16
+  timeout_seconds: 15
+  retries: 1
+  user_agent: "clash-node-pipeline/1.0"
+  # Proxy for fetching subscriptions blocked on a direct connection. When set,
+  # each source is tried via the proxy first, then direct. Accepts an
+  # http(s)/socks5 URL, "host:port", or a bare port. Empty = direct only.
+  # Clash Verge's default mixed port is usually 7890.
+  proxy: ""
+
+speedtest:
+  stage1_concurrency: 500
+  stage1_timeout_ms: 1200
+  stage2_enabled: true
+  stage2_concurrency: 200
+  stage2_timeout_ms: 1800
+  stage2_attempts: 3
+  # Before TCP testing, large subscriptions are pre-trimmed to speed up runs.
+  # If candidate_limit > 0, it wins. Otherwise max_nodes * candidate_multiplier is used.
+  candidate_limit: 0
+  candidate_multiplier: 5
+  # URL used for the mihomo core latency test below.
+  test_url: "http://www.gstatic.com/generate_204"
+  # mihomo core delay test runs BY DEFAULT after TCP screening (most accurate,
+  # all protocols). Leave core path empty to auto-detect Clash Verge. If no core
+  # is found it gracefully falls back to TCP results. Set mihomo_disabled: true
+  # to keep TCP-only.
+  mihomo_disabled: false
+  mihomo_core_path: ""
+  mihomo_concurrency: 32
+  mihomo_timeout_ms: 5000
+
+output:
+  file: "output/clash.yaml"
+  report_file: "output/report.json"
+  bad_nodes_file: "output/bad_nodes.log"
+  # v2rayN-style subscription (one share link per line, whole file base64).
+  v2rayn_file: "output/v2rayn.txt"
+  max_nodes: 1000
+  include_dead_nodes_if_empty: false

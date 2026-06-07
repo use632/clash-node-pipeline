@@ -1,0 +1,10 @@
+proxies:
+  - name: bad-port
+    type: ss
+    server: 127.0.0.1
+    port: not-a-number
+  - name: missing-server
+    type: trojan
+    port: 443
+    password: x
+  - [this is malformed for a proxy map]

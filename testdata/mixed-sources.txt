@@ -1,0 +1,22 @@
+proxies:
+  - name: "HK Test"
+    type: ss
+    server: 127.0.0.1
+    port: 443
+    cipher: aes-128-gcm
+    password: demo
+  - name: "HK Test"
+    type: trojan
+    server: 127.0.0.1
+    port: 443
+    password: demo2
+  - name: "Broken Missing Server"
+    type: ss
+    port: 8388
+    cipher: aes-128-gcm
+    password: demo
+
+# Mixed URI lines are also accepted.
+trojan://password@example.com:443?security=tls&sni=example.com#Example Trojan
+ss://YWVzLTEyOC1nY206cGFzc3dvcmQ@example.org:8388#Example SS
+this is not a node
