@@ -102,6 +102,7 @@ go test ./...
 
 - The GUI and subscription server bind to `127.0.0.1` only.
 - mihomo delay testing needs a mihomo core on the machine; Clash Verge provides one.
+- The v2rayN subscription only includes `vmess` / `vless` / `trojan` / `ss` nodes — v2rayN doesn't import plain `http`/`socks` proxies. The Clash output keeps every node (Clash supports those protocols).
 - This is a personal tool for organizing and testing your own subscriptions.
 
 ## License

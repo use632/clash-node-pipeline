@@ -120,7 +120,7 @@ var pageTemplate = template.Must(template.New("page").Parse(`<!doctype html>
         <tr><td>耗时</td><td>{{.Report.DurationMS}} ms</td></tr>
         <tr><td>Clash 配置</td><td><code>{{.Report.OutputFile}}</code></td></tr>
         {{if .Report.V2rayNFile}}
-        <tr><td>v2rayN 订阅</td><td><code>{{.Report.V2rayNFile}}</code>（链接 {{.Report.V2rayNLinks}}，跳过 {{.Report.V2rayNSkipped}}）</td></tr>
+        <tr><td>v2rayN 订阅</td><td><code>{{.Report.V2rayNFile}}</code>（可导入 {{.Report.V2rayNLinks}}，跳过 {{.Report.V2rayNSkipped}} 个 v2rayN 不支持的节点，如 http/socks）</td></tr>
         {{end}}
         <tr><td>坏节点日志</td><td><code>{{.Report.BadNodesFile}}</code></td></tr>
       </table>

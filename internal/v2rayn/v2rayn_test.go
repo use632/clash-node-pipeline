@@ -50,3 +50,14 @@ func TestBuildLinksCountsSkipped(t *testing.T) {
 		t.Fatalf("expected 1 link 1 skipped, got %d/%d", len(links), skipped)
 	}
 }
+
+func TestHTTPAndSocksSkipped(t *testing.T) {
+	// v2rayN does not import plain http/socks proxies from a subscription, so we
+	// must not emit them (otherwise the link count won't match what v2rayN shows).
+	for _, typ := range []string{"http", "https", "socks", "socks5"} {
+		n := model.Node{Name: "x", Type: typ, Server: "h", Port: 8080, Raw: map[string]any{"username": "u", "password": "p"}}
+		if link, ok := nodeToLink(n); ok {
+			t.Fatalf("%s should be skipped for v2rayN, got %q", typ, link)
+		}
+	}
+}

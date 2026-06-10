@@ -95,20 +95,6 @@ func ssLink(n model.Node) (string, bool) {
 	return u, true
 }
 
-func userPassLink(scheme string, n model.Node) (string, bool) {
-	user := rawStr(n, "username")
-	pass := rawStr(n, "password")
-	var auth string
-	switch {
-	case user != "" && pass != "":
-		auth = url.QueryEscape(user) + ":" + url.QueryEscape(pass) + "@"
-	case user != "":
-		auth = url.QueryEscape(user) + "@"
-	}
-	u := fmt.Sprintf("%s://%s%s%s", scheme, auth, hostPort(n), frag(n.Name))
-	return u, true
-}
-
 func tlsField(n model.Node) string {
 	if rawBool(n, "tls") {
 		return "tls"

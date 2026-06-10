@@ -46,6 +46,10 @@ func Write(path string, nodes []model.Node) (int, int, error) {
 	return len(links), skipped, nil
 }
 
+// nodeToLink converts a node to a v2rayN share link. Only the protocols v2rayN
+// actually imports from a subscription are emitted (vmess/vless/trojan/ss);
+// plain http/socks proxies and other Clash-only types are skipped, since v2rayN
+// ignores them on import anyway and counting them would be misleading.
 func nodeToLink(n model.Node) (string, bool) {
 	switch strings.ToLower(n.Type) {
 	case "vmess":
@@ -56,10 +60,6 @@ func nodeToLink(n model.Node) (string, bool) {
 		return trojanLink(n)
 	case "ss", "shadowsocks":
 		return ssLink(n)
-	case "socks5", "socks":
-		return userPassLink("socks", n)
-	case "http", "https":
-		return userPassLink("http", n)
 	default:
 		return "", false
 	}

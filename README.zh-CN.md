@@ -104,6 +104,7 @@ go test ./...
 
 - 图形界面和订阅服务只监听 `127.0.0.1`。
 - mihomo 测速需要本机有 mihomo 内核，Clash Verge 自带。
+- v2rayN 订阅只包含 `vmess` / `vless` / `trojan` / `ss` 节点 —— v2rayN 不导入纯 `http`/`socks` 代理。Clash 输出则保留全部节点（Clash 支持这些协议）。
 - 本工具用于整理和测试你自己的订阅。
 
 ## 许可证
