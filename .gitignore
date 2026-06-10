@@ -4,7 +4,8 @@
 # Compiled binaries
 *.exe
 *.exe~
-clash-node-pipeline
+# root-level binary only (leading slash so it does NOT match the cmd/clash-node-pipeline/ package dir)
+/clash-node-pipeline
 
 # Personal/live config files (keep them locally, don't publish)
 configs/live-*.yaml
