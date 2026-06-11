@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/use632/clash-node-pipeline/internal/model"
@@ -89,5 +90,40 @@ func TestFetchFallsBackToDirect(t *testing.T) {
 	}
 	if string(res.Content) != "direct-body" {
 		t.Fatalf("unexpected body: %q", res.Content)
+	}
+}
+
+func TestLooksLikeAntiBotChallenge(t *testing.T) {
+	cf := []byte(`<!DOCTYPE html><html><head><title>Just a moment...</title></head>` +
+		`<body><script>window._cf_chl_opt={cRay:'x'};</script>` +
+		`<script src="/cdn-cgi/challenge-platform/h/g/orchestrate/chl_page/v1"></script></body></html>`)
+	if !looksLikeAntiBotChallenge(cf) {
+		t.Fatal("Cloudflare challenge page not detected")
+	}
+	normal := []byte("proxies:\n  - {name: a, type: ss, server: x, port: 1}\ntrojan://p@h:443#A\n")
+	if looksLikeAntiBotChallenge(normal) {
+		t.Fatal("normal subscription content wrongly flagged as a challenge")
+	}
+}
+
+// A Cloudflare-style 403 challenge must surface an actionable error, not a bare
+// status code, so the user understands why an apparently valid URL yields nothing.
+func TestFetchReportsAntiBotChallenge(t *testing.T) {
+	origin := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write([]byte(`<!doctype html><html><head><title>Just a moment...</title></head>` +
+			`<body><script>window._cf_chl_opt={};</script></body></html>`))
+	}))
+	defer origin.Close()
+
+	cfg := model.FetchConfig{TimeoutSeconds: 5, Retries: 0}
+	clients := buildClients(cfg)
+	src := model.Source{Name: "s", URL: origin.URL, Enabled: true}
+	res := fetchOne(context.Background(), clients, src, cfg)
+	if res.Err == "" {
+		t.Fatal("expected a fetch error for a challenge page")
+	}
+	if !strings.Contains(res.Err, "人机验证") {
+		t.Fatalf("error should flag the anti-bot challenge, got: %s", res.Err)
 	}
 }

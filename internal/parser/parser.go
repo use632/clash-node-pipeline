@@ -4,8 +4,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"html"
 	"net"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -22,6 +24,15 @@ func ParseContent(source string, content []byte) ([]model.Node, []model.ParseIss
 	var all []model.Node
 	var issues []model.ParseIssue
 	for _, text := range texts {
+		// Some sources are web pages (blog posts) that embed share links inside
+		// HTML rather than serving a clean txt/yaml. Detect that and scan the
+		// whole document for links, since they won't sit on their own lines.
+		if looksHTML(text) {
+			htmlNodes, htmlIssues := parseHTML(source, text)
+			all = append(all, htmlNodes...)
+			issues = append(issues, htmlIssues...)
+			continue
+		}
 		looksYAML := strings.Contains(text, "proxies:")
 		nodes, yamlIssues := parseYAML(source, []byte(text))
 		all = append(all, nodes...)
@@ -36,6 +47,66 @@ func ParseContent(source string, content []byte) ([]model.Node, []model.ParseIss
 		issues = append(issues, lineIssues...)
 	}
 	return all, issues
+}
+
+// nodeURIRe matches proxy share links anywhere in a blob of text/HTML. It stops
+// at whitespace and characters that commonly delimit a link inside HTML markup
+// (quotes, angle brackets, backticks). Plain http/https are deliberately
+// excluded here: an HTML page is full of website URLs, and matching them would
+// turn page links into bogus "http proxy" nodes. Longer scheme names come first
+// so the alternation prefers them.
+var nodeURIRe = regexp.MustCompile(`(?i)\b(?:vmess|vless|trojan|ssr|ss|hysteria2|hysteria|hy2|tuic|socks5|socks)://[^\s"'` + "`" + `<>\\]+`)
+
+// looksHTML reports whether text is an HTML document rather than a plain
+// subscription/link list.
+func looksHTML(text string) bool {
+	head := text
+	if len(head) > 4096 {
+		head = head[:4096]
+	}
+	lower := strings.ToLower(head)
+	return strings.Contains(lower, "<!doctype html") ||
+		strings.Contains(lower, "<html") ||
+		strings.Contains(lower, "<head") ||
+		strings.Contains(lower, "<body") ||
+		strings.Contains(lower, "<meta") ||
+		strings.Contains(lower, "<div") ||
+		strings.Contains(lower, "<p>") ||
+		strings.Contains(lower, "<br")
+}
+
+// parseHTML extracts every share link embedded in an HTML page, de-noising the
+// markup (entity decoding) first. Links that fail to parse are recorded as
+// issues but never abort the run. A short link extracted from HTML is far more
+// likely to be a real node than line-based parsing of raw markup, so we dedupe
+// the extracted link strings before parsing to avoid the same node appearing
+// once per HTML occurrence.
+func parseHTML(source, htmlText string) ([]model.Node, []model.ParseIssue) {
+	// Decode entities so query separators like &amp; become &, then look for
+	// links in both the raw and decoded forms (some are inside attributes).
+	decoded := html.UnescapeString(htmlText)
+	candidates := nodeURIRe.FindAllString(decoded, -1)
+
+	var nodes []model.Node
+	var issues []model.ParseIssue
+	seen := map[string]bool{}
+	for _, link := range candidates {
+		link = strings.TrimRight(link, ".,;)]}。，") // trailing punctuation/CJK noise
+		if link == "" || seen[link] {
+			continue
+		}
+		seen[link] = true
+		n, err := parseURI(source, link)
+		if err != nil {
+			issues = append(issues, model.ParseIssue{Source: source, Line: truncate(link, 180), Err: "html link: " + err.Error()})
+			continue
+		}
+		nodes = append(nodes, n)
+	}
+	if len(nodes) == 0 && len(candidates) == 0 {
+		issues = append(issues, model.ParseIssue{Source: source, Err: "网页中未找到节点链接（vmess/vless/trojan/ss 等）"})
+	}
+	return nodes, issues
 }
 
 func decodePossiblyBase64(text string) []string {

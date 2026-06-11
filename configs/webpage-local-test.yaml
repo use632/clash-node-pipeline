@@ -1,0 +1,42 @@
+# Demo config: use a locally-saved web page (HTML with node links in the body)
+# as a source. This is the workaround for pages behind Cloudflare / anti-bot
+# challenges that can't be fetched automatically: open the page in your browser,
+# save it as .html, then point a source at that file.
+sources:
+  - name: saved-webpage
+    url: "testdata/webpage-nodes.html"
+    enabled: true
+
+date_formats:
+  - "20060102"
+  - "2006-01-02"
+
+fetch:
+  concurrency: 4
+  timeout_seconds: 15
+  retries: 1
+  user_agent: "clash-node-pipeline/1.0"
+  proxy: ""
+
+speedtest:
+  stage1_concurrency: 100
+  stage1_timeout_ms: 1200
+  stage2_enabled: true
+  stage2_concurrency: 50
+  stage2_timeout_ms: 1800
+  stage2_attempts: 2
+  candidate_limit: 0
+  candidate_multiplier: 5
+  test_url: "http://www.gstatic.com/generate_204"
+  mihomo_disabled: true
+  mihomo_core_path: ""
+  mihomo_concurrency: 16
+  mihomo_timeout_ms: 5000
+
+output:
+  file: "output/webpage-test.clash.yaml"
+  report_file: "output/webpage-test.report.json"
+  bad_nodes_file: "output/webpage-test.bad_nodes.log"
+  v2rayn_file: "output/webpage-test.v2rayn.txt"
+  max_nodes: 1000
+  include_dead_nodes_if_empty: false

@@ -40,8 +40,8 @@ var pageTemplate = template.Must(template.New("page").Parse(`<!doctype html>
     <div class="card">
       <form method="post">
         <label>订阅 URL（每行一个，可粘贴多个）</label>
-        <textarea name="source_urls" placeholder="https://example.com/a.yaml&#10;https://example.com/b.yaml" required>{{.Form.SourceURLs}}</textarea>
-        <div class="hint">支持换行、逗号或空格分隔；重复的 URL 会自动忽略。链接里的日期（如 <code>2026/06</code>、<code>20260607</code>）会在每次运行时自动校正到当天；运行成功后会自动记住这些链接，下次打开自动填好。</div>
+        <textarea name="source_urls" placeholder="https://example.com/a.yaml&#10;https://example.com/b.txt&#10;https://some-blog.example/free-nodes/  （直接贴节点的网页也行）" required>{{.Form.SourceURLs}}</textarea>
+        <div class="hint">支持换行、逗号或空格分隔；重复的 URL 会自动忽略。除了 <code>.yaml</code>/<code>.txt</code> 订阅，也可直接粘贴「把节点链接写在正文里的网页」（如博客文章），程序会自动从网页里抓取 <code>vmess/vless/trojan/ss</code> 等链接再去重测速。链接里的日期（如 <code>2026/06</code>、<code>20260607</code>）会在每次运行时自动校正到当天；运行成功后会自动记住这些链接，下次打开自动填好。</div>
 
         <label>拉取代理（订阅拉不到时填，留空=直连）</label>
         <input type="text" name="proxy" value="{{.Form.Proxy}}" placeholder="http://127.0.0.1:7890">
@@ -102,6 +102,9 @@ var pageTemplate = template.Must(template.New("page").Parse(`<!doctype html>
         {{if .Report.FetchedViaProxy}}
         <tr><td>经代理拉取的订阅</td><td>{{.Report.FetchedViaProxy}}</td></tr>
         {{end}}
+        {{if .Report.FetchFailed}}
+        <tr><td>拉取失败</td><td>{{.Report.FetchFailed}}（原因见下方「问题明细」）</td></tr>
+        {{end}}
         <tr><td>原始解析节点</td><td>{{.Report.RawParsedNodes}}</td></tr>
         <tr><td>解析/清洗问题</td><td>{{.Report.ParseIssues}}</td></tr>
         <tr><td>清洗后节点</td><td>{{.Report.NormalizedNodes}}</td></tr>
@@ -126,6 +129,18 @@ var pageTemplate = template.Must(template.New("page").Parse(`<!doctype html>
       </table>
       <p>把 <code>{{.Report.OutputFile}}</code> 导入 Clash/Mihomo 即可使用。{{if .Report.V2rayNFile}}<br>v2rayN 用户可导入 <code>{{.Report.V2rayNFile}}</code>（已 Base64 编码的订阅文件）。{{end}}</p>
     </div>
+
+    {{if .Report.BadNodes}}
+    <div class="card">
+      <h2>问题明细（最多 15 条）</h2>
+      <p class="hint">拉取失败、解析失败或被清洗掉的条目；完整列表见 <code>{{.Report.BadNodesFile}}</code>。</p>
+      <table>
+        {{range $i, $issue := .Report.BadNodes}}{{if lt $i 15}}
+        <tr><td>{{$issue.Source}}</td><td>{{$issue.Err}}{{if $issue.Line}}<br><code>{{$issue.Line}}</code>{{end}}</td></tr>
+        {{end}}{{end}}
+      </table>
+    </div>
+    {{end}}
 
     <div class="card">
       <h2>本地订阅地址（推荐）</h2>

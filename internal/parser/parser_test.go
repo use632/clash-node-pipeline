@@ -112,6 +112,58 @@ func TestLinkListNoYAMLNoise(t *testing.T) {
 	}
 }
 
+func TestParseHTMLPageEmbeddedLinks(t *testing.T) {
+	// Simulates a blog post that lists share links inside HTML markup: links
+	// wrapped in tags, query separators HTML-encoded as &amp;, the same link
+	// repeated, and ordinary website URLs (http/https) that must NOT be
+	// mistaken for proxy nodes.
+	htmlPage := `<!doctype html><html><head><meta charset="utf-8"><title>free nodes</title></head>
+<body>
+<p>访问 <a href="https://example.com/page">官网</a> 获取更多节点。</p>
+<div class="post-content">
+<p>trojan://pass123@tj.example.com:443?sni=tj.example.com#TJ-01</p>
+<code>vless://uuid-1234@vl.example.com:443?type=ws&amp;security=tls&amp;sni=vl.example.com#VL-Node</code>
+<li>ss://YWVzLTEyOC1nY206cGFzc3dvcmQ=@ss.example.com:8388#SS-Tokyo</li>
+<pre>trojan://pass123@tj.example.com:443?sni=tj.example.com#TJ-01</pre>
+</div>
+<script src="https://cdn.example.com/app.js"></script>
+</body></html>`
+	nodes, _ := ParseContent("blog", []byte(htmlPage))
+	if len(nodes) != 3 {
+		t.Fatalf("expected 3 unique proxy nodes, got %d: %#v", len(nodes), nodes)
+	}
+	byType := map[string]int{}
+	for _, n := range nodes {
+		byType[n.Type]++
+		if n.Type == "http" || n.Type == "https" {
+			t.Fatalf("website URL leaked in as a proxy node: %#v", n)
+		}
+	}
+	if byType["trojan"] != 1 || byType["vless"] != 1 || byType["ss"] != 1 {
+		t.Fatalf("unexpected node type distribution %v: %#v", byType, nodes)
+	}
+	// The &amp;-encoded query must be decoded so ws/tls survive on the vless node.
+	for _, n := range nodes {
+		if n.Type != "vless" {
+			continue
+		}
+		if n.Raw["network"] != "ws" || n.Raw["tls"] != true {
+			t.Fatalf("vless ws/tls query not decoded from &amp;: %#v", n.Raw)
+		}
+	}
+}
+
+func TestParseHTMLPageNoLinksReportsIssue(t *testing.T) {
+	htmlPage := `<!doctype html><html><body><p>今天没有节点，请明天再来。</p></body></html>`
+	nodes, issues := ParseContent("blog", []byte(htmlPage))
+	if len(nodes) != 0 {
+		t.Fatalf("expected no nodes from a link-free page, got %d", len(nodes))
+	}
+	if len(issues) == 0 {
+		t.Fatalf("expected an issue explaining no links were found")
+	}
+}
+
 func contains(s, sub string) bool {
 	return len(s) >= len(sub) && (s == sub || indexOf(s, sub) >= 0)
 }

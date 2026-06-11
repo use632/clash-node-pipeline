@@ -14,7 +14,7 @@ Pull multiple Clash/Mihomo or v2rayN subscriptions, parse and de-duplicate the n
 ## Features
 
 - **Multi-source merge** — many subscriptions in, one file out; de-duplicated by fingerprint (type / server / port / credentials), not just name.
-- **Tolerant parsing** — Clash YAML, base64 subscriptions, raw share links (`ss` / `vmess` / `vless` / `trojan` / ...), and v2rayN-style txt. Broken entries are skipped, never fatal.
+- **Tolerant parsing** — Clash YAML, base64 subscriptions, raw share links (`ss` / `vmess` / `vless` / `trojan` / ...), v2rayN-style txt, and web pages that list node links inline (e.g. blog posts — links are auto-extracted from the HTML). Broken entries are skipped, never fatal.
 - **Two-stage speed test** — fast TCP screening, then mihomo-core delay testing across all protocols, which drops nodes that connect but don't actually work.
 - **Multiple outputs** — Clash/Mihomo YAML, a v2rayN subscription, and a built-in local subscription server.
 - **Date-aware URLs** — links with an embedded date (`.../2026/06/0-20260607.txt`) are shifted to today on every run.

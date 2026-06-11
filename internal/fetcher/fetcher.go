@@ -181,15 +181,60 @@ func fetchOnce(ctx context.Context, client *http.Client, rawURL, ua string) ([]b
 			return nil, err
 		}
 		defer resp.Body.Close()
+		body, readErr := readLimited(resp.Body)
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			// Cloudflare and similar anti-bot gateways answer a non-browser
+			// request with a JS "challenge" page (commonly 403/503). No plain
+			// HTTP client can pass it, so say so plainly instead of just a code.
+			if readErr == nil && looksLikeAntiBotChallenge(body) {
+				return nil, fmt.Errorf("http %d 人机验证页（疑似 Cloudflare，自动抓取无法通过 JS 校验；可在浏览器打开后把网页另存为 .html，再用该文件路径作为来源）", resp.StatusCode)
+			}
 			return nil, fmt.Errorf("http status %d", resp.StatusCode)
 		}
-		return readLimited(resp.Body)
+		if readErr != nil {
+			return nil, readErr
+		}
+		// Some gateways serve the challenge with a 200 status; treat that as a
+		// failure too, otherwise it parses to "0 nodes" with no explanation.
+		if looksLikeAntiBotChallenge(body) {
+			return nil, fmt.Errorf("返回的是人机验证页（疑似 Cloudflare），不是真实内容；自动抓取无法通过 JS 校验，可在浏览器打开后把网页另存为 .html，再用该文件路径作为来源")
+		}
+		return body, nil
 	}
 	// Local file source. Relative paths resolve against the current working
 	// directory (where the command is run), which is the least-surprising rule.
 	path := strings.TrimPrefix(rawURL, "file://")
 	return os.ReadFile(filepath.Clean(path))
+}
+
+// looksLikeAntiBotChallenge reports whether an HTML body is an anti-bot
+// interstitial (Cloudflare "Just a moment...", JS/cookie challenge, etc.)
+// rather than the page we asked for. These require a real browser to solve, so
+// a plain HTTP fetch never sees the content behind them — detecting it lets us
+// give the user an actionable message instead of a bare status code or an
+// empty "0 nodes" result.
+func looksLikeAntiBotChallenge(body []byte) bool {
+	const sniff = 8192
+	head := body
+	if len(head) > sniff {
+		head = head[:sniff]
+	}
+	lower := strings.ToLower(string(head))
+	markers := []string{
+		"_cf_chl_opt",
+		"/cdn-cgi/challenge-platform",
+		"challenge-platform",
+		"cf-browser-verification",
+		"just a moment",
+		"enable javascript and cookies to continue",
+		"checking your browser before accessing",
+	}
+	for _, m := range markers {
+		if strings.Contains(lower, m) {
+			return true
+		}
+	}
+	return false
 }
 
 func readLimited(r interface{ Read([]byte) (int, error) }) ([]byte, error) {
